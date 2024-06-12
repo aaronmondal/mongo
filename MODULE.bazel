@@ -1,0 +1,35 @@
+module(
+    name = "mongo",
+    version = "0",
+    compatibility_level = 0,
+)
+
+# Common Starlark utilities.
+bazel_dep(name = "bazel_skylib", version = "1.7.0")
+
+# Explicit platform configuration.
+bazel_dep(name = "platforms", version = "0.0.10")
+host_platform = use_extension("@platforms//host:extension.bzl", "host_platform")
+use_repo(host_platform, "host_platform")
+
+# Rules for C and C++.
+bazel_dep(name = "rules_cc", version = "0.0.9")
+
+# Rules for Python.
+bazel_dep(name = "rules_python", version = "0.32.2")
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(python_version = "3.11") # TODO(aaronmondal): 3.12?
+use_repo(python, "python_3_12")
+
+# Python Poetry support.
+bazel_dep(name = "rules_poetry", version = "0.3.4")
+poetry = use_extension("@rules_poetry//python:extensions.bzl", "poetry")
+poetry.parse(
+    name = "poetry",
+    lock = "@//:poetry.lock",
+)
+use_repo(poetry, "poetry")
+
+# Custom dependencies.
+mongo_deps = use_extension("@mongo//bazel:extensions.bzl", "mongo_dependencies")
+use_repo(mongo_deps, "local-remote-execution")
